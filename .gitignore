@@ -1,0 +1,15 @@
+# 忽略所有内容
+/*
+
+# 但不忽略 input 和 project 文件夹
+input/
+!project/
+project/__pycache__/*
+project/.ipynb_checkpoints/*
+!.gitignore
+
+# 确保 input 和 project 文件夹中的内容也被保留
+!project/**
+
+# 忽略 project 文件夹中的 exp 文件夹及其内容
+project/exp/
