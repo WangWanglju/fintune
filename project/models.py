@@ -15,7 +15,7 @@ def load_model_and_tokenizer(args):
         args.model_name_or_path,
         num_labels=2,
         use_cache=False,
-        torch_dtype=torch.bfloat16
+        torch_dtype=torch.float16
     )
     # else:
     #     model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path)

@@ -18,7 +18,7 @@ class TrainDataset(Dataset):
         super().__init__()
         self.cfg = cfg
         self.dataset = dataset
-        self.dataset = self.process2(self.dataset, tokenizer)
+        # self.dataset = self.process2(self.dataset, tokenizer)
         self.tokenizer = tokenizer
         
         self.preprocess_fn = preprocess_fn or self.default_preprocess_fn  # Use custom preprocess if provided
