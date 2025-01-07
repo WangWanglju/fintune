@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from config import get_config
 from datasets import TrainDataset, collate_fn
 from models import load_model_and_tokenizer
-from train import train_one_epoch, evaluate
+from train_utils import train_one_epoch, evaluate
 from utils import setup_logger, save_model
 from deepspeed.ops.adam import DeepSpeedCPUAdam, FusedAdam
 import deepspeed
@@ -81,9 +81,7 @@ def train_loop(data, fold, config, device, logger):
     AdamOptimizer =  FusedAdam
     optimizer = AdamOptimizer(model.parameters(),
                               lr=config.learning_rate,
-                              betas=(0.9, 0.95),
-                            #   weight_decay=0.01
-                              )
+                              betas=(0.9, 0.95))
     
     num_update_steps_per_epoch = math.ceil(
         len(train_dataloader) / config.gradient_accumulation_steps)
@@ -162,6 +160,8 @@ def test(data, fold, config, device, logger):
                                 pin_memory=True
                                 )
     
+    # optimizer_grouped_parameters = get_optimizer_grouped_parameters(
+    # model, args.weight_decay, args.lora_learning_rate)
 
     AdamOptimizer =  FusedAdam
     optimizer = AdamOptimizer(model.parameters(),

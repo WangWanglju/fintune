@@ -16,11 +16,10 @@ class TrainDataset(Dataset):
 
     def __init__(self, dataset, tokenizer, cfg, preprocess_fn=None):
         super().__init__()
-        self.cfg = cfg
         self.dataset = dataset
-        # self.dataset = self.process2(self.dataset, tokenizer)
+        self.dataset = self.process2(self.dataset, tokenizer)
         self.tokenizer = tokenizer
-        
+        self.cfg = cfg
         self.preprocess_fn = preprocess_fn or self.default_preprocess_fn  # Use custom preprocess if provided
 
     def __len__(self):
@@ -79,9 +78,9 @@ class TrainDataset(Dataset):
                 s_no = 256
                 e_no = -256
             else:
-                max_no = self.cfg.max_length
-                s_no = max_no // 2
-                e_no = -max_no // 2
+                max_no = 1024
+                s_no = 512
+                e_no = -512
             for text in tqdm(row[col]):
                 encoded = tokenizer(text, return_offsets_mapping=True)
                 if len(encoded['input_ids']) > max_no:

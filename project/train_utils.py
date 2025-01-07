@@ -16,8 +16,7 @@ def train_one_epoch(model, dataloader, optimizer, lr_scheduler, device, logger, 
         logger.info(f"Starting training for epoch {epoch}...")
     for step, batch in enumerate(tqdm(dataloader, desc=f"Training Epoch {epoch}")):
         batch = {k: v.to(device) for k, v in batch.items()}
-        # for k,v in model.named_parameters():
-        #     print(f"{k} -> requires_grad: {v.requires_grad}")
+
         outputs = model(**batch)
         loss = outputs.loss
 
@@ -62,7 +61,6 @@ def evaluate(model, dataloader, device, logger, epoch, config):
     with torch.no_grad():
         for batch in tqdm(dataloader, desc="Evaluating"):
             batch = {k: v.to(device) for k, v in batch.items()}
-
             outputs = model(input_ids=batch["input_ids"], labels=batch["labels"])
             total_loss += outputs.loss.item()
 

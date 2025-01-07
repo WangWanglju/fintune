@@ -12,7 +12,7 @@ class Config:
     debug: bool = True
     train_dataset_path: str = "/root/autodl-tmp/WSDM/input/train.csv"
     model_name_or_path: str = "/root/autodl-tmp/WSDM/working/gemma-2-9b-it-bnb-4bit"
-    output_dir: str = "exp/test"
+    output_dir: str = "exp/newbaseline"
     lora_path: str = 'none'
     per_device_train_batch_size: int = 1
     per_device_eval_batch_size: int = 4
