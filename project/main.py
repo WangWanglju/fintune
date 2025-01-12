@@ -43,10 +43,28 @@ def train_loop(data, fold, config, device, logger):
     train_data = data[data['fold'] != fold].reset_index(drop=True)
     eval_data = data[data['fold'] == fold].reset_index(drop=True)
 
+    #add extra data
+    # train_data = pd.read_csv('/root/autodl-tmp/WSDM/input/extra.csv')
+    # train_data = pd.concat([train_data, extra], ignore_index=True)
     if config.debug:
         train_data = train_data.iloc[:4000]
+        
         eval_data = eval_data.iloc[:1000]
 
+    # language_counts = train_data['language'].value_counts()
+    # # 找出出现次数 <= 50 的语言
+    # print(train_data['language'].value_counts())
+    # languages_to_duplicate = language_counts[language_counts <= 50].index
+
+    # # 筛选出这些语言类型的行
+    # df_to_duplicate = train_data[train_data['language'].isin(languages_to_duplicate)]
+
+    # # 复制三倍
+    # df_to_duplicate = pd.concat([df_to_duplicate] * 2, ignore_index=True)
+
+    # # 将复制后的数据追加到原DataFrame后面
+    # train_data = pd.concat([train_data, df_to_duplicate], ignore_index=True)
+    # print('after', train_data['language'].value_counts())
     model, tokenizer = load_model_and_tokenizer(config)
 
     train_dataset = TrainDataset(train_data, tokenizer, config)

@@ -12,7 +12,7 @@ class Config:
     debug: bool = True
     train_dataset_path: str = "/root/autodl-tmp/WSDM/input/train.csv"
     model_name_or_path: str = "/root/autodl-tmp/WSDM/working/gemma-2-9b-it-bnb-4bit"
-    output_dir: str = "exp/newbaseline"
+    output_dir: str = "exp/test"
     lora_path: str = 'none'
     per_device_train_batch_size: int = 1
     per_device_eval_batch_size: int = 4
@@ -20,7 +20,7 @@ class Config:
     num_train_epochs: int = 1
     learning_rate: float = 5e-5
     max_prompt_length: int = 512
-    max_length: int = 2048
+    max_length: int = 1024
     num_warmup_steps: int = 100
     seed: int = 42
     device: str = field(default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu")

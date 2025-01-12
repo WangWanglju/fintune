@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
-
+import numpy as np
 
 class TrainDataset(Dataset):
     """
@@ -38,17 +38,13 @@ class TrainDataset(Dataset):
             attention_mask (list[int]): Attention mask for the input.
             length (int): The length of the input sequence.
         """
-        
         prompt = '<prompt>: ' + row['prompt']
 
-        response_a = '\n\n<response_a>: ' + row['response_a']
-        response_b = '\n\n<response_b>: ' + row['response_b']
-        extra_prompt = f"""
-        Compare the outputs of response_a and response_b based on prompt I provided. Evaluate them based on accuracy, clarity, logic, completeness, and any other relevant factors. Decide which is better.
-        Context:
-                """
+        response_a = row['response_a']
+        response_b = row['response_b']
+        # print(response_a)
+
         # Tokenize prompt and responses
-        # extra_prompt = self.tokenizer(extra_prompt, add_special_tokens=False)['input_ids']
         p = self.tokenizer(prompt, add_special_tokens=False)['input_ids']
         a = self.tokenizer(response_a, add_special_tokens=False)['input_ids']
         b = self.tokenizer(response_b, add_special_tokens=False)['input_ids']
@@ -61,20 +57,31 @@ class TrainDataset(Dataset):
         response_length = (self.cfg.max_length * 2 - len(p)) // 2
         # response_length = self.cfg.max_length
         # Build input_ids with special tokens
-        input_ids = (
-            [self.tokenizer.bos_token_id] +
-            # extra_prompt +
-            p +
-            a[-response_length:] +
-            b[-response_length:] +
-            [self.tokenizer.eos_token_id]
-        )
+        if np.random.rand() < 0.5:
+            input_ids = (
+                [self.tokenizer.bos_token_id] +
+                p +
+                a[-response_length:] +
+                b[-response_length:] +
+                [self.tokenizer.eos_token_id]
+            )
+            label = 0 if row['winner'] == 'model_a' else 1
+        else:
+            input_ids = (
+                [self.tokenizer.bos_token_id] +
+                p +
+                b[-response_length:] +
+                a[-response_length:] +
+                [self.tokenizer.eos_token_id]
+            )
+            label = 0 if row['winner'] == 'model_b' else 1
 
         # Build attention mask
         length = len(input_ids)
         attention_mask = [1] * length
-
-        return input_ids, attention_mask, length
+        # Convert winner ('model_a' or 'model_b') to binary label
+        
+        return input_ids, attention_mask, length, label
 
     def process2(self, row, tokenizer):
         for col in ['prompt', 'response_a', 'response_b']:
@@ -116,10 +123,9 @@ class TrainDataset(Dataset):
             dict: A dictionary containing processed input IDs, attention mask, and label.
         """
         row = self.dataset.iloc[idx]
-        input_ids, attention_mask, length = self.preprocess_fn(row)
+        input_ids, attention_mask, length,label = self.preprocess_fn(row)
 
-        # Convert winner ('model_a' or 'model_b') to binary label
-        label = 0 if row['winner'] == 'model_a' else 1
+        
 
         return {
             'input_ids': torch.tensor(input_ids, dtype=torch.long),

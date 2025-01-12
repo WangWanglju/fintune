@@ -1,4 +1,5 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModelForSequenceClassification, \
+Qwen2ForSequenceClassification
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 import torch
 from transformers import Gemma2ForSequenceClassification, GemmaTokenizerFast
@@ -7,11 +8,11 @@ import torch
 
 
 def load_model_and_tokenizer(args):
-    tokenizer = GemmaTokenizerFast.from_pretrained(args.model_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     tokenizer.add_eos_token = True
     tokenizer.padding_side = "right"
     # if args.use_4bit:
-    model = Gemma2ForSequenceClassification.from_pretrained(
+    model = AutoModelForSequenceClassification.from_pretrained(
         args.model_name_or_path,
         num_labels=2,
         use_cache=False,
@@ -43,6 +44,7 @@ def load_model_and_tokenizer(args):
         for k,v in d.items():
             state_dic['base_model.model.' + k] = v
         model.load_state_dict(state_dic, strict=False)
+        print(f"Loaded LoRA model from {args.lora_path}")
     return model, tokenizer
 
 
