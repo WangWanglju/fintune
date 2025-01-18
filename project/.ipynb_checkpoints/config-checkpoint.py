@@ -9,18 +9,19 @@ class Config:
     Training configuration, including both general and DeepSpeed-specific options.
     """
     # General training configuration
-    debug: bool = True
+    debug: bool = False
     train_dataset_path: str = "/root/autodl-tmp/WSDM/input/train.csv"
     model_name_or_path: str = "/root/autodl-tmp/WSDM/working/gemma-2-9b-it-bnb-4bit"
-    output_dir: str = "exp/test"                                       
-    lora_path: str = 'none'
+    output_dir: str = "exp/posttrain_fulldata"
+    lora_path: str = '/root/autodl-tmp/WSDM/project/exp/pretrain/best_model_epoch_0/adapter.bin'
     per_device_train_batch_size: int = 1
     per_device_eval_batch_size: int = 4
     gradient_accumulation_steps: int = 4
     num_train_epochs: int = 1
-    learning_rate: float = 5e-5
+    learning_rate: float = 1e-5
     max_prompt_length: int = 512
-    max_length: int = 2048 
+    max_length: int = 1024
+    num_warmup_steps: int = 100
     seed: int = 42
     device: str = field(default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu")
     n_splits: int = 5  # For cross-validation
@@ -31,13 +32,10 @@ class Config:
     fp16: bool = True  # Enable FP16 mixed precision training
     bf16: bool = False
     local_rank: int = -1  # For distributed training
+
     
     lr_scheduler_type: str = 'cosine'
-    num_warmup_steps: int = 50
-
-    #model
-    r = 256
-    lora_alpha = 128
+    num_warmup_steps: int = 100
 
     def get_deepspeed_config(self) -> dict:
         """

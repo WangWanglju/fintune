@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from config import get_config
-from datasets import TrainDataset, collate_fn
+from dataset import TrainDataset, collate_fn
 from models import load_model_and_tokenizer
 from train_utils import train_one_epoch, evaluate
 from utils import setup_logger, save_model
@@ -44,7 +44,7 @@ def train_loop(data, fold, config, device, logger):
     eval_data = data[data['fold'] == fold].reset_index(drop=True)
 
     #add extra data
-    # train_data = pd.read_csv('/root/autodl-tmp/WSDM/input/extra.csv')
+    # extra = pd.read_csv('/root/autodl-tmp/WSDM/input/all_extra_data.csv')
     # train_data = pd.concat([train_data, extra], ignore_index=True)
     if config.debug:
         train_data = train_data.iloc[:4000]
@@ -54,13 +54,11 @@ def train_loop(data, fold, config, device, logger):
     # language_counts = train_data['language'].value_counts()
     # # 找出出现次数 <= 50 的语言
     # print(train_data['language'].value_counts())
-    # languages_to_duplicate = language_counts[language_counts <= 50].index
-
+    # languages_to_duplicate = language_counts[language_counts <= 10].index
     # # 筛选出这些语言类型的行
     # df_to_duplicate = train_data[train_data['language'].isin(languages_to_duplicate)]
-
-    # # 复制三倍
-    # df_to_duplicate = pd.concat([df_to_duplicate] * 2, ignore_index=True)
+    # # 复制1倍
+    # df_to_duplicate = pd.concat([df_to_duplicate] * 1, ignore_index=True)
 
     # # 将复制后的数据追加到原DataFrame后面
     # train_data = pd.concat([train_data, df_to_duplicate], ignore_index=True)
@@ -129,18 +127,19 @@ def train_loop(data, fold, config, device, logger):
                 save_model(config, model, tokenizer, f"best_model_epoch_{epoch}")
                 best_score = outputs['score']
                 logger.info(f"Saving....\nbest score: {outputs['score']}")
+        # save_model(config, model, tokenizer, f"last_model_epoch_{epoch}")
 
 def test(data, fold, config, device, logger):
     deepspeed_config = config.get_deepspeed_config()
     print("DeepSpeed Configuration:")
     print(deepspeed_config)
     data['response_b'] = data.apply(
-        lambda row: '\n\n<response_b>: ' + (str(row['response_b']) if pd.notnull(row['response_b']) else 'N/A'),
+        lambda row: (str(row['response_b']) if pd.notnull(row['response_b']) else 'N/A'),
         axis=1
     )
 
     data['response_a'] = data.apply(
-        lambda row: '\n\n<response_a>: ' + (str(row['response_a']) if pd.notnull(row['response_a']) else 'N/A'),
+        lambda row: (str(row['response_a']) if pd.notnull(row['response_a']) else 'N/A'),
         axis=1
     )
     train_data = data[data['fold'] != fold].reset_index(drop=True)

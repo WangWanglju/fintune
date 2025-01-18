@@ -54,24 +54,32 @@ class TrainDataset(Dataset):
         b = self.tokenizer(response_b, add_special_tokens=False)['input_ids']
 
         # # Truncate prompt if it exceeds max length
-        if len(p) > self.cfg.max_prompt_length:
-            p = p[-self.cfg.max_prompt_length:]
+        # if len(p) > self.cfg.max_prompt_length:
+        #     p = p[-self.cfg.max_prompt_length:]
 
-        # # Calculate response lengths
-        response_length = (self.cfg.max_length * 2 - len(p)) // 2
+        # # # Calculate response lengths
+        # response_length = (self.cfg.max_length - len(p)) // 2
         # response_length = self.cfg.max_length
         # Build input_ids with special tokens
+        # input_ids = (
+        #     [self.tokenizer.bos_token_id] +
+        #     # extra_prompt +
+        #     p +
+        #     a[-response_length:] +
+        #     b[-response_length:] +
+        #     [self.tokenizer.eos_token_id]
+        # )
         input_ids = (
             [self.tokenizer.bos_token_id] +
             # extra_prompt +
             p +
-            a[-response_length:] +
-            b[-response_length:] +
+            a +
+            b +
             [self.tokenizer.eos_token_id]
         )
-
         # Build attention mask
         length = len(input_ids)
+        print(length)
         attention_mask = [1] * length
 
         return input_ids, attention_mask, length
@@ -85,9 +93,9 @@ class TrainDataset(Dataset):
                 s_no = self.cfg.max_prompt_length // 2
                 e_no = -self.cfg.max_prompt_length // 2
             else:
-                max_no = self.cfg.max_length
-                s_no = self.cfg.max_length // 2
-                e_no = -self.cfg.max_length // 2
+                max_no = self.cfg.max_length // 2
+                s_no = self.cfg.max_length // 4
+                e_no = -self.cfg.max_length // 4
             for text in tqdm(row[col]):
                 encoded = tokenizer(text, return_offsets_mapping=True)
                 if len(encoded['input_ids']) > max_no:
