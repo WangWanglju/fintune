@@ -15,7 +15,7 @@ from transformers import set_seed, get_scheduler
 import random
 import numpy as np
 import math
-
+import wandb
 # os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 def set_random_seed(seed):
@@ -51,18 +51,6 @@ def train_loop(data, fold, config, device, logger):
         
         eval_data = eval_data.iloc[:1000]
 
-    # language_counts = train_data['language'].value_counts()
-    # # 找出出现次数 <= 50 的语言
-    # print(train_data['language'].value_counts())
-    # languages_to_duplicate = language_counts[language_counts <= 10].index
-    # # 筛选出这些语言类型的行
-    # df_to_duplicate = train_data[train_data['language'].isin(languages_to_duplicate)]
-    # # 复制1倍
-    # df_to_duplicate = pd.concat([df_to_duplicate] * 1, ignore_index=True)
-
-    # # 将复制后的数据追加到原DataFrame后面
-    # train_data = pd.concat([train_data, df_to_duplicate], ignore_index=True)
-    # print('after', train_data['language'].value_counts())
     model, tokenizer = load_model_and_tokenizer(config)
 
     train_dataset = TrainDataset(train_data, tokenizer, config)
@@ -233,6 +221,9 @@ def main():
         os.makedirs(config.output_dir, exist_ok=True)
         # Setup logger (only for the main process)
         logger = setup_logger(config.output_dir)
+        if config.wandb:
+            wandb.init(project="WSDM", config=config.__dict__, \
+                    name=config.name, group=config.group, save_code=True)
 
         logger.info("Training started with distributed training.")
     else:
@@ -254,6 +245,9 @@ def main():
             _ = train_loop(data, i, config, device, logger)
             # _ = test(data, i, config, device, logger)
        
-
+    if rank == 0:
+        logger.info("Training finished.")
+        if config.wandb:
+            wandb.finish()
 if __name__ == "__main__":
     main()

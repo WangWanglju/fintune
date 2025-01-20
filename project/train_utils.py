@@ -3,7 +3,7 @@ from tqdm import tqdm
 import time
 from utils import timeSince, compute_metrics, AverageMeter
 import torch.distributed as dist
-
+import wandb
 
 def train_one_epoch(model, dataloader, optimizer, lr_scheduler, device, logger, epoch, config):
     model.train()
@@ -43,6 +43,10 @@ def train_one_epoch(model, dataloader, optimizer, lr_scheduler, device, logger, 
                 f"LR: {lr_scheduler.get_last_lr()[0]:.6f}"
             )
             logger.info(log_message)
+            if config.wandb:
+                wandb.log({"loss": loss.item(), 
+                        'avg_loss': losses.avg,
+                        "lr": lr_scheduler.get_last_lr()[0]})
 
     avg_loss = total_loss / len(dataloader)
     if config.local_rank == 0:
@@ -87,7 +91,11 @@ def evaluate(model, dataloader, device, logger, epoch, config):
     
     if config.local_rank == 0:
         acc = compute_metrics(all_logits, all_labels, sigmoid=False)
-
+        
+        if config.wandb:
+            wandb.log({"eval_loss": avg_loss, 
+                   "eval_acc": acc})
+        
         logger.info(f"Epoch {epoch} completed. Average Evaluation Loss: {avg_loss:.4f} Average Acc: {acc:.4f}")
         return {'loss':avg_loss, 
                 'score': acc}

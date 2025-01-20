@@ -79,7 +79,7 @@ class TrainDataset(Dataset):
         )
         # Build attention mask
         length = len(input_ids)
-        print(length)
+        # print(length)
         attention_mask = [1] * length
 
         return input_ids, attention_mask, length

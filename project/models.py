@@ -19,6 +19,9 @@ def load_model_and_tokenizer(args):
         use_cache=False,
         torch_dtype=torch.float16
     )
+    model.config.pad_token_id = tokenizer.pad_token_id
+    model.config.attn_logit_softcapping = None
+
     if 'wen' in args.model_name_or_path:
         tokenizer.pad_token = tokenizer.eos_token
         model.config.pad_token_id = model.config.eos_token_id
@@ -36,7 +39,7 @@ def load_model_and_tokenizer(args):
                                     "gate_proj",
                                     "up_proj",
                                     "down_proj",
-                                    "lm_head",
+                                    "score",
                                 ],
                             bias="none",
                             lora_dropout=0.05, 

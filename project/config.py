@@ -8,6 +8,11 @@ class Config:
     """
     Training configuration, including both general and DeepSpeed-specific options.
     """
+    #wandb
+    wandb: bool = True
+    name: str = 'attn_logit_softcapping=None'
+    group: str = 'debug'
+
     # General training configuration
     debug: bool = True
     train_dataset_path: str = "/root/autodl-tmp/WSDM/input/train.csv"
@@ -19,7 +24,7 @@ class Config:
     gradient_accumulation_steps: int = 4
     num_train_epochs: int = 1
     learning_rate: float = 5e-5
-    max_prompt_length: int = 512
+    max_prompt_length: int = 1024
     max_length: int = 2048 
     seed: int = 42
     device: str = field(default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu")
